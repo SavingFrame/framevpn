@@ -5,10 +5,12 @@ from sqlalchemy_utils import database_exists, create_database, drop_database
 from fastapi.testclient import TestClient
 import typing as t
 
-from app.core import config, security
-from app.db.session import Base, get_db
-from app.db import models
-from app.main import app
+import user.models
+import user.schemas
+from src.core import config
+from auth import security
+from src.db.session import Base, get_db
+from main import app
 
 
 def get_test_db_url() -> str:
@@ -100,12 +102,12 @@ def get_password_hash() -> str:
 
 
 @pytest.fixture
-def test_user(test_db) -> models.User:
+def test_user(test_db) -> user.models.User:
     """
     Make a test user in the database
     """
 
-    user = models.User(
+    user = user.schemas.UserSchema(
         email="fake@email.com",
         hashed_password=get_password_hash(),
         is_active=True,
@@ -116,12 +118,12 @@ def test_user(test_db) -> models.User:
 
 
 @pytest.fixture
-def test_superuser(test_db) -> models.User:
+def test_superuser(test_db) -> user.models.User:
     """
     Superuser for testing
     """
 
-    user = models.User(
+    user = user.schemas.UserSchema(
         email="fakeadmin@email.com",
         hashed_password=get_password_hash(),
         is_superuser=True,

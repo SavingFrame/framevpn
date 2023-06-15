@@ -1,40 +1,36 @@
-from fastapi import APIRouter, Request, Depends, Response, encoders
-import typing as t
+from fastapi import APIRouter, Request, Depends
+from fastapi_pagination import Page
+from fastapi_pagination.ext.sqlalchemy import paginate
+from sqlalchemy import select
 
-from app.db.session import get_db
-from app.db.crud import (
-    get_users,
+from auth.crud import (
     get_user,
     create_user,
     delete_user,
     edit_user,
 )
-from app.db.schemas import UserCreate, UserEdit, User, UserOut
-from app.core.auth import get_current_active_user, get_current_active_superuser
+from auth.dependencies import get_current_active_user, get_current_active_superuser
+from database import get_db
+from user.models import User
+from user.schemas import UserCreateSchema, UserEditSchema, UserSchema
 
 users_router = r = APIRouter()
 
 
 @r.get(
-    "/users",
-    response_model=t.List[User],
-    response_model_exclude_none=True,
+    "/users/",
 )
 async def users_list(
-    response: Response,
     db=Depends(get_db),
     current_user=Depends(get_current_active_superuser),
-):
+) -> Page[UserSchema]:
     """
     Get all users
     """
-    users = get_users(db)
-    # This is necessary for react-admin to work
-    response.headers["Content-Range"] = f"0-9/{len(users)}"
-    return users
+    return paginate(db, select(User))
 
 
-@r.get("/users/me", response_model=User, response_model_exclude_none=True)
+@r.get("/users/me/", response_model=UserSchema, response_model_exclude_none=True)
 async def user_me(current_user=Depends(get_current_active_user)):
     """
     Get own user
@@ -43,8 +39,8 @@ async def user_me(current_user=Depends(get_current_active_user)):
 
 
 @r.get(
-    "/users/{user_id}",
-    response_model=User,
+    "/users/{user_id}/",
+    response_model=UserSchema,
     response_model_exclude_none=True,
 )
 async def user_details(
@@ -63,10 +59,10 @@ async def user_details(
     # )
 
 
-@r.post("/users", response_model=User, response_model_exclude_none=True)
+@r.post("/users/", response_model=UserSchema, response_model_exclude_none=True)
 async def user_create(
     request: Request,
-    user: UserCreate,
+    user: UserCreateSchema,
     db=Depends(get_db),
     current_user=Depends(get_current_active_superuser),
 ):
@@ -77,12 +73,12 @@ async def user_create(
 
 
 @r.put(
-    "/users/{user_id}", response_model=User, response_model_exclude_none=True
+    "/users/{user_id}/", response_model=UserSchema, response_model_exclude_none=True
 )
 async def user_edit(
     request: Request,
     user_id: int,
-    user: UserEdit,
+    user: UserEditSchema,
     db=Depends(get_db),
     current_user=Depends(get_current_active_superuser),
 ):
@@ -93,7 +89,7 @@ async def user_edit(
 
 
 @r.delete(
-    "/users/{user_id}", response_model=User, response_model_exclude_none=True
+    "/users/{user_id}/", response_model=UserSchema, response_model_exclude_none=True
 )
 async def user_delete(
     request: Request,

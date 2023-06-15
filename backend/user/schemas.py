@@ -1,8 +1,9 @@
-from pydantic import BaseModel
 import typing as t
 
+from pydantic import BaseModel
 
-class UserBase(BaseModel):
+
+class UserBaseSchema(BaseModel):
     email: str
     is_active: bool = True
     is_superuser: bool = False
@@ -10,25 +11,25 @@ class UserBase(BaseModel):
     last_name: str = None
 
 
-class UserOut(UserBase):
+class UserOutSchema(UserBaseSchema):
     pass
 
 
-class UserCreate(UserBase):
+class UserCreateSchema(UserBaseSchema):
     password: str
 
     class Config:
         orm_mode = True
 
 
-class UserEdit(UserBase):
+class UserEditSchema(UserBaseSchema):
     password: t.Optional[str] = None
 
     class Config:
         orm_mode = True
 
 
-class User(UserBase):
+class UserSchema(UserBaseSchema):
     id: int
 
     class Config:

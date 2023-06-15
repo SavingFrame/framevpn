@@ -1,9 +1,6 @@
-#!/usr/bin/env python3
-
-from app.db.session import get_db
-from app.db.crud import create_user
-from app.db.schemas import UserCreate
-from app.db.session import SessionLocal
+from auth.crud import create_user
+from user.schemas import UserCreateSchema
+from database import SessionLocal
 
 
 def init() -> None:
@@ -11,7 +8,7 @@ def init() -> None:
 
     create_user(
         db,
-        UserCreate(
+        UserCreateSchema(
             email='admin@example.com',
             password='password',
             is_active=True,
