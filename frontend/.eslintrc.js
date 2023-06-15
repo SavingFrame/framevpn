@@ -1,5 +1,5 @@
-let rules = {
-  'max-len': ['error', 80, 2, { ignoreUrls: true }],
+const rules = {
+  'max-len': ['error', 120, 2, { ignoreUrls: true }],
   'no-console': [0],
   'no-restricted-syntax': 'off',
   'no-continue': 'off',
@@ -13,6 +13,7 @@ let rules = {
   'jsx-a11y/no-static-element-interactions': 'off',
   'react/jsx-one-expression-per-line': 'off',
   'react/jsx-filename-extension': [2, { extensions: ['.ts', '.tsx'] }],
+  'react/function-component-definition': 'off',
   'lines-between-class-members': [
     'error',
     'always',
@@ -21,8 +22,8 @@ let rules = {
 };
 
 module.exports = {
-  extends: ['airbnb', 'plugin:prettier/recommended', 'prettier/react'],
-  parser: 'babel-eslint',
+  extends: ['airbnb', 'plugin:prettier/recommended', 'prettier'],
+  parser: '@typescript-eslint/parser',
   rules,
   env: {
     browser: true,
@@ -31,7 +32,7 @@ module.exports = {
     jest: true,
     es6: true,
   },
-  plugins: ['react', 'react-hooks', 'jsx-a11y'],
+  plugins: ['react', 'react-hooks', 'jsx-a11y', '@typescript-eslint'],
   settings: {
     ecmascript: 6,
     jsx: true,

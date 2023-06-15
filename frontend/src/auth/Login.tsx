@@ -1,21 +1,21 @@
 import React, { FC, useState } from 'react';
 import {
-  Paper,
-  Grid,
-  TextField,
+  Alert,
   Button,
-  FormControlLabel,
   Checkbox,
-} from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import { Face, Fingerprint } from '@material-ui/icons';
-import { Alert } from '@material-ui/lab';
-import { Redirect } from 'react-router-dom';
-import { useHistory } from 'react-router';
+  FormControlLabel,
+  Grid,
+  Paper,
+  TextField,
+} from '@mui/material';
+import { makeStyles } from 'tss-react/mui';
+import { Face, Fingerprint } from '@mui/icons-material';
+import { Navigate, useNavigate } from 'react-router-dom';
 
-import { login, isAuthenticated } from '../utils/auth';
+import axios from 'axios';
+import { isAuthenticated, login, loginApiExceptionError } from './services';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles()((theme) => ({
   margin: {
     margin: theme.spacing(2),
   },
@@ -30,34 +30,36 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export const Login: FC = () => {
-  const classes = useStyles();
-  const history = useHistory();
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [error, setError] = useState<string>('');
+const Login: FC = () => {
+  const { classes } = useStyles();
+  const navigate = useNavigate();
+  const [email, setEmail] = useState<string>('admin@example.com');
+  const [password, setPassword] = useState<string>('password');
+  const [errors, setErrors] = useState<Array<string>>([]);
 
+  // eslint-disable-next-line no-unused-vars
   const handleSubmit = async (_: React.MouseEvent) => {
-    setError('');
+    setErrors([]);
     try {
       const data = await login(email, password);
+      console.log('data', data);
 
       if (data) {
-        history.push('/');
+        navigate('/');
       }
     } catch (err) {
-      if (err instanceof Error) {
-        // handle errors thrown from frontend
-        setError(err.message);
-      } else {
+      if (axios.isAxiosError(err)) {
         // handle errors thrown from backend
-        setError(String(err));
+        setErrors(loginApiExceptionError(err));
+      } else {
+        // handle errors thrown from frontend
+        setErrors([String(err)]);
       }
     }
   };
 
   return isAuthenticated() ? (
-    <Redirect to="/" />
+    <Navigate to="/" />
   ) : (
     <Paper className={classes.padding}>
       <div className={classes.margin}>
@@ -65,7 +67,7 @@ export const Login: FC = () => {
           <Grid item>
             <Face />
           </Grid>
-          <Grid item md={true} sm={true} xs={true}>
+          <Grid item md sm xs>
             <TextField
               id="email"
               label="Email"
@@ -84,7 +86,7 @@ export const Login: FC = () => {
           <Grid item>
             <Fingerprint />
           </Grid>
-          <Grid item md={true} sm={true} xs={true}>
+          <Grid item md sm xs>
             <TextField
               id="password"
               label="Password"
@@ -100,13 +102,16 @@ export const Login: FC = () => {
         </Grid>
         <br />
         <Grid container alignItems="center">
-          {error && (
-            <Grid item>
-              <Alert severity="error">{error}</Alert>
-            </Grid>
-          )}
+          {errors &&
+            errors.map((error: string) => {
+              return (
+                <Grid item xs={12} spacing={50}>
+                  <Alert severity="error">{error}</Alert>
+                </Grid>
+              );
+            })}
         </Grid>
-        <Grid container alignItems="center" justify="space-between">
+        <Grid container alignItems="center">
           <Grid item>
             <FormControlLabel
               control={<Checkbox color="primary" />}
@@ -125,13 +130,13 @@ export const Login: FC = () => {
             </Button>
           </Grid>
         </Grid>
-        <Grid container justify="center" className={classes.marginTop}>
+        <Grid container className={classes.marginTop}>
           {' '}
           <Button
             variant="outlined"
             color="primary"
             className={classes.button}
-            onClick={() => history.push('/signup')}
+            onClick={() => navigate('/signup')}
           >
             Sign Up
           </Button>{' '}
@@ -149,3 +154,5 @@ export const Login: FC = () => {
     </Paper>
   );
 };
+
+export default Login;

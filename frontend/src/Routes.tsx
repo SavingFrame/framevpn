@@ -1,54 +1,73 @@
 import React, { FC } from 'react';
-import { Switch, Route } from 'react-router-dom';
-import { useHistory } from 'react-router';
-import { makeStyles } from '@material-ui/core/styles';
+import { Routes, Route, useNavigate } from 'react-router-dom';
+// import { makeStyles } from 'tss-react/mui';
 
-import { Home, Login, SignUp, Protected, PrivateRoute } from './views';
-import { Admin } from './admin';
-import { logout } from './utils/auth';
+import Login from './auth/Login';
+import Home from './views/Home';
+import Protected from './views/Protected';
+import RequireAuth from './views/RequireAuth';
+import UsersList from './users/Users';
+import { setupResponseInterceptor } from './core/services';
 
-const useStyles = makeStyles((theme) => ({
-  app: {
-    textAlign: 'center',
-  },
-  header: {
-    backgroundColor: '#282c34',
-    minHeight: '100vh',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: 'calc(10px + 2vmin)',
-    color: 'white',
-  },
-}));
+// import { logout } from './auth/services';
 
-export const Routes: FC = () => {
-  const classes = useStyles();
-  const history = useHistory();
+// const useStyles = makeStyles()(() => ({
+//   app: {
+//     textAlign: 'center',
+//   },
+//   header: {
+//     backgroundColor: '#282c34',
+//     minHeight: '100vh',
+//     display: 'flex',
+//     flexDirection: 'column',
+//     alignItems: 'center',
+//     justifyContent: 'center',
+//     fontSize: 'calc(10px + 2vmin)',
+//     color: 'white',
+//   },
+// }));
+
+const AppRoutes: FC = () => {
+  const navigate = useNavigate();
+  const [isLoaded, setIsLoaded] = React.useState(false);
+
+  if (!isLoaded) {
+    setIsLoaded(true);
+    setupResponseInterceptor(navigate);
+  }
 
   return (
-    <Switch>
-      <Route path="/admin">
-        <Admin />
-      </Route>
-
-      <div className={classes.app}>
-        <header className={classes.header}>
-          <Route path="/login" component={Login} />
-          <Route path="/signup" component={SignUp} />
-          <Route
-            path="/logout"
-            render={() => {
-              logout();
-              history.push('/');
-              return null;
-            }}
-          />
-          <PrivateRoute path="/protected" component={Protected} />
-          <Route exact path="/" component={Home} />
-        </header>
-      </div>
-    </Switch>
+    <div>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/logout" />
+        <Route
+          path="/protected"
+          element={
+            <RequireAuth>
+              <Protected />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/users"
+          element={
+            <RequireAuth>
+              <UsersList />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/"
+          element={
+            <RequireAuth>
+              <Home />
+            </RequireAuth>
+          }
+        />
+      </Routes>
+    </div>
   );
 };
+
+export default AppRoutes;

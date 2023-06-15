@@ -1,5 +1,4 @@
 export * from './Home';
-export * from './Login';
-export * from './SignUp';
+export * from '../auth/Login';
 export * from './Protected';
-export * from './PrivateRoute';
+export * from './RequireAuth';

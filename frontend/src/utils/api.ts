@@ -1,13 +1,34 @@
-import { BACKEND_URL } from '../config';
+import axios, { AxiosInstance } from 'axios';
+import { BASE_URL } from '../config';
+/* eslint-disable import/prefer-default-export */
 
-export const getMessage = async () => {
-  const response = await fetch(BACKEND_URL);
+// export const getMessage = async () => {
+//   const response = await fetch(BACKEND_URL);
+//
+//   const data = await response.json();
+//
+//   if (data.message) {
+//     return data.message;
+//   }
+//
+//   return Promise.reject('Failed to get message from backend');
+// };
 
-  const data = await response.json();
+export const apiClient: AxiosInstance = axios.create({
+  baseURL: BASE_URL,
+});
 
-  if (data.message) {
-    return data.message;
+apiClient.interceptors.request.use(
+  function (config) {
+    const token = localStorage.getItem('token');
+    if (token && !config.headers.hasAuthorization()) {
+      // eslint-disable-next-line no-param-reassign
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  function (error) {
+    // Do something with request error
+    return Promise.reject(error);
   }
-
-  return Promise.reject('Failed to get message from backend');
-};
+);
