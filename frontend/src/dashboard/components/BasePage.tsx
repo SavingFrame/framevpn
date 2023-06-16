@@ -51,6 +51,19 @@ export default function ResponsiveDrawer({ children }: { children: any }) {
             <ListItemText primary="Users" />
           </ListItemButton>
         </ListItem>
+        <ListItem
+          component={Link}
+          to="/network/interfaces"
+          key="interfaces"
+          disablePadding
+        >
+          <ListItemButton>
+            <ListItemIcon>
+              <InboxIcon />
+            </ListItemIcon>
+            <ListItemText primary="Interfaces" />
+          </ListItemButton>
+        </ListItem>
       </List>
     </div>
   );

@@ -12,12 +12,12 @@ import { getUsers, UserListResponse } from './services';
 
 interface Column {
   id:
-    | 'id'
-    | 'first_name'
-    | 'last_name'
-    | 'email'
-    | 'is_active'
-    | 'is_superuser';
+| 'id'
+| 'first_name'
+| 'last_name'
+| 'email'
+| 'is_active'
+| 'is_superuser';
   label: string;
   minWidth?: number;
   align?: 'right';

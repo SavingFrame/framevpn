@@ -8,6 +8,7 @@ import Protected from './views/Protected';
 import RequireAuth from './views/RequireAuth';
 import UsersList from './users/Users';
 import { setupResponseInterceptor } from './core/services';
+import Network from './network/Network';
 
 // import { logout } from './auth/services';
 
@@ -54,6 +55,14 @@ const AppRoutes: FC = () => {
           element={
             <RequireAuth>
               <UsersList />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/network/interfaces"
+          element={
+            <RequireAuth>
+              <Network />
             </RequireAuth>
           }
         />

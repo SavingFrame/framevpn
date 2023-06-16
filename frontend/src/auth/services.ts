@@ -1,11 +1,10 @@
 import decodeJwt from 'jwt-decode';
+import { AxiosError } from 'axios';
+import { apiClient } from '../utils';
 
 export const isAuthenticated = () => {
-  const permissions = localStorage.getItem('permissions');
-  if (!permissions) {
-    return false;
-  }
-  return permissions === 'user' || permissions === 'admin' ? true : false;
+  const token = localStorage.getItem('token');
+  return Boolean(token);
 };
 
 /**
@@ -21,23 +20,14 @@ export const login = async (email: string, password: string) => {
   if (!(email.length > 0) || !(password.length > 0)) {
     throw new Error('Email or password was not provided');
   }
-  const formData = new FormData();
   // OAuth2 expects form data, not JSON data
-  formData.append('username', email);
-  formData.append('password', password);
-
-  const request = new Request('/api/token', {
-    method: 'POST',
-    body: formData,
-  });
-
-  const response = await fetch(request);
+  const response = await apiClient.post('api/login/', { email, password });
 
   if (response.status === 500) {
     throw new Error('Internal server error');
   }
 
-  const data = await response.json();
+  const data = await response.data;
 
   if (response.status > 400 && response.status < 500) {
     if (data.detail) {
@@ -47,13 +37,42 @@ export const login = async (email: string, password: string) => {
   }
 
   if ('access_token' in data) {
-    const decodedToken: any = decodeJwt(data['access_token']);
-    localStorage.setItem('token', data['access_token']);
+    const decodedToken: any = decodeJwt(data.access_token);
+    localStorage.setItem('token', data.access_token);
     localStorage.setItem('permissions', decodedToken.permissions);
   }
 
   return data;
 };
+
+type ErrorDetailResponse = {
+  loc: Array<string>;
+  msg: string;
+  type: string;
+};
+
+type ErrorDataResponse = {
+  detail: Array<ErrorDetailResponse>;
+};
+
+export function loginApiExceptionError(error: AxiosError): string[] {
+  try {
+    const responseData: ErrorDataResponse | null | undefined = error.response
+      ?.data as ErrorDataResponse | null | undefined;
+    if (!responseData) {
+      return [String(error)];
+    }
+    const errors: string[] = [];
+    responseData.detail.forEach((errorDetail) => {
+      const location = errorDetail.loc.join('.');
+      const errorMessage = errorDetail.msg;
+      errors.push(`${location}: ${errorMessage}`);
+    });
+    return errors;
+  } catch {
+    return [String(error)];
+  }
+}
 
 /**
  * Sign up via backend and store JSON web token on success
@@ -104,8 +123,8 @@ export const signUp = async (
   }
 
   if ('access_token' in data) {
-    const decodedToken: any = decodeJwt(data['access_token']);
-    localStorage.setItem('token', data['access_token']);
+    const decodedToken: any = decodeJwt(data.access_token);
+    localStorage.setItem('token', data.access_token);
     localStorage.setItem('permissions', decodedToken.permissions);
   }
 
@@ -114,5 +133,4 @@ export const signUp = async (
 
 export const logout = () => {
   localStorage.removeItem('token');
-  localStorage.removeItem('permissions');
 };
