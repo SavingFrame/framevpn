@@ -10,6 +10,7 @@ from starlette.middleware.cors import CORSMiddleware
 from auth.dependencies import get_current_active_user
 from auth.views import auth_router
 from config import settings
+from network.views import network_router
 from user.views import users_router
 
 # from src.core.celery_app import celery_app
@@ -51,11 +52,6 @@ def authjwt_exception_handler(request: Request, exc: AuthJWTException):
 #     return response
 
 
-@app.get('/api/v1')
-async def root():
-    return {'message': 'Hello World'}
-
-
 # @app.get('/api/v1/task')
 # async def example_task():
 #     celery_app.send_task('app.tasks.example_task', args=['Hello World'])
@@ -71,6 +67,12 @@ app.include_router(
     dependencies=[Depends(get_current_active_user)],
 )
 app.include_router(auth_router, prefix='/api', tags=['auth'])
+app.include_router(
+    network_router,
+    prefix='/api/v1/network',
+    tags=['network'],
+    dependencies=[Depends(get_current_active_user)]
+)
 
 if __name__ == '__main__':
-    uvicorn.run('main:app', host='0.0.0.0', reload=True, port=8888)
+    uvicorn.run('main:app', host='0.0.0.0', reload=True, port=8000)

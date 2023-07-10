@@ -1,7 +1,6 @@
 from fastapi.security import HTTPBearer
 from passlib.context import CryptContext
 
-# oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/login/")
 bearer_scheme = HTTPBearer(auto_error=False)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

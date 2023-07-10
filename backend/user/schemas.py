@@ -11,10 +11,6 @@ class UserBaseSchema(BaseModel):
     last_name: str = None
 
 
-class UserOutSchema(UserBaseSchema):
-    pass
-
-
 class UserCreateSchema(UserBaseSchema):
     password: str
 
@@ -34,13 +30,3 @@ class UserSchema(UserBaseSchema):
 
     class Config:
         orm_mode = True
-
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-
-class TokenData(BaseModel):
-    email: str = None
-    permissions: str = "user"

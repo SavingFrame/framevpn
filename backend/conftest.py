@@ -5,16 +5,15 @@ from sqlalchemy_utils import database_exists, create_database, drop_database
 from fastapi.testclient import TestClient
 import typing as t
 
-import user.models
-import user.schemas
-from src.core import config
 from auth import security
-from src.db.session import Base, get_db
+from database import Base, get_db
 from main import app
+from config import settings
+from user.models import User
 
 
 def get_test_db_url() -> str:
-    return f"{config.SQLALCHEMY_DATABASE_URI}_test"
+    return f'{settings.DATABASE_URL}_test'
 
 
 @pytest.fixture
@@ -38,7 +37,7 @@ def test_db():
     test_session = test_session_maker()
     test_session.begin_nested()
 
-    @event.listens_for(test_session, "after_transaction_end")
+    @event.listens_for(test_session, 'after_transaction_end')
     def restart_savepoint(s, transaction):
         if transaction.nested and not transaction._parent.nested:
             s.expire_all()
@@ -52,7 +51,7 @@ def test_db():
     connection.close()
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope='session', autouse=True)
 def create_test_db():
     """
     Create a test database and use it for the whole test session.
@@ -63,7 +62,7 @@ def create_test_db():
     # Create the test database
     assert not database_exists(
         test_db_url
-    ), "Test database already exists. Aborting tests."
+    ), 'Test database already exists. Aborting tests.'
     create_database(test_db_url)
     test_engine = create_engine(test_db_url)
     Base.metadata.create_all(test_engine)
@@ -91,24 +90,24 @@ def client(test_db):
 
 @pytest.fixture
 def test_password() -> str:
-    return "securepassword"
+    return 'securepassword'
 
 
 def get_password_hash() -> str:
     """
     Password hashing can be expensive so a mock will be much faster
     """
-    return "supersecrethash"
+    return 'supersecrethash'
 
 
 @pytest.fixture
-def test_user(test_db) -> user.models.User:
+def test_user(test_db) -> User:
     """
     Make a test user in the database
     """
 
-    user = user.schemas.UserSchema(
-        email="fake@email.com",
+    user = User(
+        email='fake@email.com',
         hashed_password=get_password_hash(),
         is_active=True,
     )
@@ -118,13 +117,13 @@ def test_user(test_db) -> user.models.User:
 
 
 @pytest.fixture
-def test_superuser(test_db) -> user.models.User:
+def test_superuser(test_db) -> User:
     """
     Superuser for testing
     """
 
-    user = user.schemas.UserSchema(
-        email="fakeadmin@email.com",
+    user = User(
+        email='fakeadmin@email.com',
         hashed_password=get_password_hash(),
         is_superuser=True,
     )
@@ -141,16 +140,16 @@ def verify_password_mock(first: str, second: str) -> bool:
 def user_token_headers(
     client: TestClient, test_user, test_password, monkeypatch
 ) -> t.Dict[str, str]:
-    monkeypatch.setattr(security, "verify_password", verify_password_mock)
+    monkeypatch.setattr(security, 'verify_password', verify_password_mock)
 
     login_data = {
-        "username": test_user.email,
-        "password": test_password,
+        'username': test_user.email,
+        'password': test_password,
     }
-    r = client.post("/api/token", data=login_data)
+    r = client.post('/api/token', data=login_data)
     tokens = r.json()
-    a_token = tokens["access_token"]
-    headers = {"Authorization": f"Bearer {a_token}"}
+    a_token = tokens['access_token']
+    headers = {'Authorization': f'Bearer {a_token}'}
     return headers
 
 
@@ -158,14 +157,14 @@ def user_token_headers(
 def superuser_token_headers(
     client: TestClient, test_superuser, test_password, monkeypatch
 ) -> t.Dict[str, str]:
-    monkeypatch.setattr(security, "verify_password", verify_password_mock)
+    monkeypatch.setattr(security, 'verify_password', verify_password_mock)
 
     login_data = {
-        "username": test_superuser.email,
-        "password": test_password,
+        'username': test_superuser.email,
+        'password': test_password,
     }
-    r = client.post("/api/token", data=login_data)
+    r = client.post('/api/token', data=login_data)
     tokens = r.json()
-    a_token = tokens["access_token"]
-    headers = {"Authorization": f"Bearer {a_token}"}
+    a_token = tokens['access_token']
+    headers = {'Authorization': f'Bearer {a_token}'}
     return headers

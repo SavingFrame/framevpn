@@ -1,10 +1,9 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
-import typing as t
 
 from auth.security import get_password_hash
 from user.models import User
-from user.schemas import UserSchema, UserBaseSchema, UserOutSchema, UserCreateSchema, UserEditSchema
+from user.schemas import UserSchema, UserCreateSchema, UserEditSchema
 
 
 def get_user(db: Session, user_id: int):
