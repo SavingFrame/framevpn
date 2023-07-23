@@ -1,2 +1,48 @@
-[tool.black]
-line-length = 120
+[project]
+name = "FrameVPN"
+version = "0.1.0"
+description = "Multiple server wireguard VPN"
+authors = [
+    { name = "SavingFrame", email = "savingframe@gmail.com" }
+]
+dependencies = [
+    "Authlib==0.14.3",
+    "Faker",
+    "Jinja2==3.1.2",
+    "SQLAlchemy==2.0.16",
+    "alembic==1.11.1",
+    "bcrypt==4.0.1",
+    "celery==5.3.0",
+    "coolname",
+    "email-validator",
+    "fastapi==0.97.0",
+    "fastapi-jwt-auth==0.5.0",
+    "fastapi-pagination",
+    "httpx==0.24.1",
+    "ipython==7.31.1",
+    "itsdangerous==2.1.2",
+    "passlib==1.7.4",
+    "psycopg2==2.9.6",
+    "pydantic==1.10",
+    "pyroute2",
+    "pytest==7.3.2",
+    "python-dotenv",
+    "python-multipart==0.0.6",
+    "redis==4.5.5",
+    "requests==2.31.0",
+    "sqlalchemy-utils==0.41.1",
+    "uvicorn==0.22.0",
+]
+readme = "README.md"
+requires-python = ">= 3.8"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev-dependencies = []
+
+[tool.hatch.metadata]
+allow-direct-references = true
