@@ -4,102 +4,107 @@ import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import { Grid } from '@mui/material';
+import { Grid, Skeleton } from '@mui/material';
 import { ArrowDownward, ArrowUpward, HelpOutline } from '@mui/icons-material';
-import { NetworkInterface, getInterfaces } from '../services';
+import { useGetNetworkInterfacesQuery } from '../services';
 
 export default function NetworkInterfaces() {
-  const [interfacesList, setInterfacesList] = React.useState<
-    NetworkInterface[]
-  >([]);
-  React.useEffect(() => {
-    const fetchData = async () => {
-      const data = await getInterfaces();
-      setInterfacesList(data);
-    };
-    fetchData();
-  }, []);
-
+  const { data, error, isLoading } = useGetNetworkInterfacesQuery();
   const getState = (state: boolean | null) => {
-    if (state) {
+    if (state === true) {
       return (
-        <Typography
-          sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}
-          color="success.main"
-        >
+        <Typography color="success.main">
           <ArrowUpward />
           UP
         </Typography>
       );
     }
-    if (!state) {
+    if (state === false) {
       return (
-        <Typography
-          sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}
-          color="error.main"
-        >
+        <Typography color="error.main">
           <ArrowDownward />
           DOWN
         </Typography>
       );
     }
     return (
-      <Typography
-        sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}
-        color="warning.main"
-      >
+      <Typography color="warning.main">
         <HelpOutline />
         UNKNOWN
       </Typography>
     );
   };
 
-  return (
-    <div>
-      <div
-        style={{
-          border: '1px solid #ccc',
-          padding: '10px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
-        <h2>Block 1</h2>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => console.log('Create button clicked')}
-        >
-          Create
-        </Button>
-      </div>
-      <div className="card-block-container">
-        <Grid container spacing={3}>
-          {interfacesList.map((networkInterface) => {
-            return (
-              <Grid item xs={3}>
-                <Card sx={{ minWidth: 275 }}>
-                  <CardContent>
-                    <Typography variant="h5" component="div">
-                      {networkInterface.name}
-                    </Typography>
-                    {getState(networkInterface.state)}
-                    <Typography variant="body2">
-                      IP Address: {networkInterface.ip_address}
-                      <br />
-                      Mac Address: {networkInterface.mac_address}
-                    </Typography>
-                  </CardContent>
-                  <CardActions>
-                    <Button size="small">Learn More</Button>
-                  </CardActions>
-                </Card>
-              </Grid>
-            );
-          })}
+  if (isLoading) {
+    // Show Skeleton while loading
+    return (
+      <Grid container spacing={3} sx={{ border: 1 }}>
+        {Array.from(new Array(4)).map((_, index) => (
+          // eslint-disable-next-line react/no-array-index-key
+          <Grid item xs={3} key={`skeleton-${index}`}>
+            <Card sx={{ minWidth: 230 }}>
+              <CardContent>
+                <Skeleton height={50} />
+                <Skeleton height={30} />
+              </CardContent>
+              <CardActions>
+                <Button size="small">
+                  <Skeleton variant="text" width={80} />
+                </Button>
+              </CardActions>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+    );
+  }
+
+  if (!data || data.length === 0 || error) {
+    // Show message when there is no data
+    return (
+      <Grid container spacing={3} sx={{ border: 1 }}>
+        <Grid item xs={11}>
+          <h2> Interfaces</h2>
         </Grid>
-      </div>
-    </div>
+        <Grid xs={1}>
+          <Button variant="contained">Test button</Button>
+        </Grid>
+        <Grid item xs={12}>
+          <Typography variant="body2">No data available.</Typography>
+        </Grid>
+      </Grid>
+    );
+  }
+
+  // Render the data when not loading and data is available
+  return (
+    <Grid container spacing={3} sx={{ border: 1 }}>
+      <Grid item xs={11}>
+        <h2> Interfaces</h2>
+      </Grid>
+      <Grid xs={1}>
+        <Button variant="contained">Test button</Button>
+      </Grid>
+      {data.map((networkInterface) => (
+        <Grid item xs={3} key={networkInterface.id}>
+          <Card sx={{ minWidth: 230 }}>
+            <CardContent>
+              <Typography variant="h5" component="div">
+                {networkInterface.name}
+              </Typography>
+              {getState(networkInterface.state)}
+              <Typography variant="body2">
+                IP Address: {networkInterface.ip_address}
+                <br />
+                Mac Address: {networkInterface.mac_address}
+              </Typography>
+            </CardContent>
+            <CardActions>
+              <Button size="small">Learn More</Button>
+            </CardActions>
+          </Card>
+        </Grid>
+      ))}
+    </Grid>
   );
 }

@@ -122,3 +122,4 @@ Temporary Items
 */.env
 .env
 *.env
+backend/data

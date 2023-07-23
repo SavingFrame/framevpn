@@ -1,6 +1,5 @@
 import React, { FC } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
-// import { makeStyles } from 'tss-react/mui';
 
 import Login from './auth/Login';
 import Home from './views/Home';
@@ -9,24 +8,9 @@ import RequireAuth from './views/RequireAuth';
 import UsersList from './users/Users';
 import { setupResponseInterceptor } from './core/services';
 import Network from './network/Network';
-
-// import { logout } from './auth/services';
-
-// const useStyles = makeStyles()(() => ({
-//   app: {
-//     textAlign: 'center',
-//   },
-//   header: {
-//     backgroundColor: '#282c34',
-//     minHeight: '100vh',
-//     display: 'flex',
-//     flexDirection: 'column',
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//     fontSize: 'calc(10px + 2vmin)',
-//     color: 'white',
-//   },
-// }));
+import Wireguard from './wireguard/Wireguard';
+import AddWireguardInterface from './wireguard/AddWireguardInterface';
+import WireguardInterfaceDetails from './wireguard/DetailWireguardInterface';
 
 const AppRoutes: FC = () => {
   const navigate = useNavigate();
@@ -63,6 +47,30 @@ const AppRoutes: FC = () => {
           element={
             <RequireAuth>
               <Network />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/wireguard/interfaces"
+          element={
+            <RequireAuth>
+              <Wireguard />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/wireguard/interfaces/:uuid"
+          element={
+            <RequireAuth>
+              <WireguardInterfaceDetails />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/wireguard/interfaces/add"
+          element={
+            <RequireAuth>
+              <AddWireguardInterface />
             </RequireAuth>
           }
         />

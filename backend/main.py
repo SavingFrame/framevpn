@@ -12,19 +12,23 @@ from auth.views import auth_router
 from config import settings
 from network.views import network_router
 from user.views import users_router
+from wireguard.views import wireguard_router
 
 # from src.core.celery_app import celery_app
 
 app = FastAPI(
-    title=settings.PROJECT_NAME, docs_url='/api/docs', openapi_url='/api'
+    title=settings.PROJECT_NAME,
+    docs_url='/api/docs',
+    openapi_url='/api',
+    swagger_ui_parameters={
+        'persistAuthorization': True,
+    }
 )
 add_pagination(app)
 
-origins = ["*"]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=['*'],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -71,6 +75,12 @@ app.include_router(
     network_router,
     prefix='/api/v1/network',
     tags=['network'],
+    dependencies=[Depends(get_current_active_user)]
+)
+app.include_router(
+    wireguard_router,
+    prefix='/api/v1/wireguard',
+    tags=['wireguard'],
     dependencies=[Depends(get_current_active_user)]
 )
 

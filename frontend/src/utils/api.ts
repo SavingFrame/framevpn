@@ -19,7 +19,7 @@ export const apiClient: AxiosInstance = axios.create({
 });
 
 apiClient.interceptors.request.use(
-  function (config) {
+  (config) => {
     const token = localStorage.getItem('token');
     if (token && !config.headers.hasAuthorization()) {
       // eslint-disable-next-line no-param-reassign
@@ -27,7 +27,7 @@ apiClient.interceptors.request.use(
     }
     return config;
   },
-  function (error) {
+  (error) => {
     // Do something with request error
     return Promise.reject(error);
   }

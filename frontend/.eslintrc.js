@@ -14,6 +14,7 @@ const rules = {
   'react/jsx-one-expression-per-line': 'off',
   'react/jsx-filename-extension': [2, { extensions: ['.ts', '.tsx'] }],
   'react/function-component-definition': 'off',
+  'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
   'lines-between-class-members': [
     'error',
     'always',

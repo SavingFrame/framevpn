@@ -42,8 +42,6 @@ const Login: FC = () => {
     setErrors([]);
     try {
       const data = await login(email, password);
-      console.log('data', data);
-
       if (data) {
         navigate('/');
       }

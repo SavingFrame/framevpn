@@ -3,8 +3,8 @@ from user.schemas import UserCreateSchema
 from database import SessionLocal
 
 
+db = SessionLocal()
 def init() -> None:
-    db = SessionLocal()
 
     create_user(
         db,

@@ -6,4 +6,4 @@ class InterfaceSchema(BaseModel):
     state: bool | None
     ip_address: IPvAnyAddress | None
     name: str
-    mac_address: str
+    mac_address: str | None

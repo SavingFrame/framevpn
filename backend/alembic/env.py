@@ -1,3 +1,4 @@
+import importlib
 import os
 import sys
 from logging.config import fileConfig
@@ -6,12 +7,21 @@ from alembic import context
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
-# add base dir
-
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
 
-from database import Base  # noqa: E402
+
+def import_project_models(base_dir):
+    modules = []
+    for root, dirs, files in os.walk(base_dir):
+        if 'models.py' in files or 'models' in dirs:
+            module_path = os.path.join(root, 'models')
+            module_path = module_path.replace(base_dir, '').replace('/', '.')[1:]
+            module = importlib.import_module(module_path)
+            modules.append(module)
+    return modules
+
+
 from config import settings  # noqa: E402
 
 # this is the Alembic Config object, which provides
@@ -26,8 +36,13 @@ fileConfig(config.config_file_name)
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
+import_project_models(BASE_DIR)
+from database import Base  # noqa: E402
+
 target_metadata = Base.metadata
 
+
+# target_metadata = User.__base__.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

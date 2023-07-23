@@ -1,4 +1,4 @@
-import { apiClient } from '../utils';
+import { api } from '../core/store/api';
 
 export type NetworkInterface = {
   id: number;
@@ -8,11 +8,12 @@ export type NetworkInterface = {
   mac_address: string;
 };
 
-export const getInterfaces = async (): Promise<NetworkInterface[]> => {
-  const response = await apiClient.get('api/v1/network/interfaces/', {});
-  if (response.status === 200) {
-    const data = await response.data;
-    return data;
-  }
-  throw new Error('Request failed');
-};
+export const networkApi = api.injectEndpoints({
+  endpoints: (builder) => ({
+    getNetworkInterfaces: builder.query<NetworkInterface[], void>({
+      query: () => ({ url: '/api/v1/network/interfaces/', method: 'GET' }),
+    }),
+  }),
+});
+
+export const { useGetNetworkInterfacesQuery } = networkApi;

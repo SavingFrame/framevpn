@@ -12,14 +12,27 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import MailIcon from '@mui/icons-material/Mail';
+import PeopleIcon from '@mui/icons-material/People';
+import LanIcon from '@mui/icons-material/Lan';
 import MenuIcon from '@mui/icons-material/Menu';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-import { Link } from 'react-router-dom';
+import { makeStyles } from 'tss-react/mui';
+import { NavLink, useLocation } from 'react-router-dom';
+import DnsIcon from '@mui/icons-material/Dns';
+
+const useStyles = makeStyles()((theme) => ({
+  listItemText: {
+    color: theme.palette.text.primary, // Set the desired color here
+  },
+}));
 
 export default function ResponsiveDrawer({ children }: { children: any }) {
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [drawerWidth] = React.useState(240);
+  const location = useLocation();
+
+  const { classes } = useStyles();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -43,25 +56,51 @@ export default function ResponsiveDrawer({ children }: { children: any }) {
       </List>
       <Divider />
       <List>
-        <ListItem component={Link} to="/users" key="users" disablePadding>
-          <ListItemButton>
+        <ListItem component={NavLink} to="/users" key="users" disablePadding>
+          <ListItemButton selected={location.pathname === '/users'}>
             <ListItemIcon>
-              <InboxIcon />
+              <PeopleIcon />
             </ListItemIcon>
-            <ListItemText primary="Users" />
+            <ListItemText
+              primary="Users"
+              classes={{ primary: classes.listItemText }}
+            />
           </ListItemButton>
         </ListItem>
         <ListItem
-          component={Link}
+          component={NavLink}
           to="/network/interfaces"
-          key="interfaces"
+          key="network"
           disablePadding
         >
-          <ListItemButton>
+          <ListItemButton
+            selected={location.pathname === '/network/interfaces'}
+          >
             <ListItemIcon>
-              <InboxIcon />
+              <LanIcon />
             </ListItemIcon>
-            <ListItemText primary="Interfaces" />
+            <ListItemText
+              primary="Network"
+              classes={{ primary: classes.listItemText }}
+            />
+          </ListItemButton>
+        </ListItem>
+        <ListItem
+          component={NavLink}
+          to="/wireguard/interfaces"
+          key="wireguardInterfaces"
+          disablePadding
+        >
+          <ListItemButton
+            selected={location.pathname === '/wireguard/interfaces'}
+          >
+            <ListItemIcon>
+              <DnsIcon />
+            </ListItemIcon>
+            <ListItemText
+              primary="Wireguard"
+              classes={{ primary: classes.listItemText }}
+            />
           </ListItemButton>
         </ListItem>
       </List>
