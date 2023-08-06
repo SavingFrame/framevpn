@@ -10,13 +10,17 @@ import {
   MenuItem,
   Skeleton,
 } from '@mui/material';
+import { useDispatch } from 'react-redux';
 import {
   useAddWireguardInterfaceMutation,
   useGetCreateInterfaceDefaultValuesQuery,
+  // useGetIpTableRulesQuery,
+  wireguardApi,
 } from '../services';
 import { useGetNetworkInterfacesQuery } from '../../network/services';
 
-const WireguardInterfaceForm = () => {
+const AddWireguardInterfaceForm = () => {
+  const dispatch = useDispatch();
   const { data, error, isLoading } = useGetCreateInterfaceDefaultValuesQuery();
   const {
     data: interfacesData,
@@ -57,6 +61,38 @@ const WireguardInterfaceForm = () => {
     await addWireguardInterface(sendData);
     setInterfaceData(initialData);
   };
+  // const { data: ipTableRulesData, isLoading: ipTableRulesIsLoading } =
+  //   useGetIpTableRulesQuery(
+  //     {
+  //       name: interfaceData.name,
+  //       gatewayInterface: interfaceData.gateway_interface,
+  //     },
+  //     { skip: skipGetIpTableRules }
+  //   );
+  const handleOnBlurNameOrGateway = async () => {
+    // setSkipGetIpTableRules(false);
+    dispatch(
+      // @ts-ignore
+      wireguardApi.endpoints.getIpTableRules.initiate(
+        {
+          name: interfaceData.name,
+          gatewayInterface: interfaceData.gateway_interface,
+        },
+        { forceRefetch: true }
+      )
+    )
+      .unwrap()
+      .then((result: any) => {
+        console.log('result', result);
+        setInterfaceData((prevData) => ({
+          ...prevData,
+          onUp: result.on_up.join('\n') || '',
+          onDown: result.on_down.join('\n') || '',
+        }));
+      });
+    // });
+  };
+
   useEffect(() => {
     if (!isLoading && data) {
       const iptablesOnUp = data?.on_up.join('\n');
@@ -100,6 +136,7 @@ const WireguardInterfaceForm = () => {
             label="Name"
             value={interfaceData.name}
             onChange={handleChange}
+            onBlur={handleOnBlurNameOrGateway}
             fullWidth
             required
           />
@@ -126,6 +163,7 @@ const WireguardInterfaceForm = () => {
                 label="Gateway"
                 onChange={handleChange}
                 value={interfaceData.gateway_interface}
+                onBlur={handleOnBlurNameOrGateway}
               >
                 {interfacesData.map((networkInterface) => (
                   <MenuItem
@@ -200,4 +238,4 @@ const WireguardInterfaceForm = () => {
   return <form onSubmit={handleSubmit}>{renderForm()}</form>;
 };
 
-export default WireguardInterfaceForm;
+export default AddWireguardInterfaceForm;

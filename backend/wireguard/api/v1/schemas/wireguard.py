@@ -1,13 +1,12 @@
 import ipaddress
-from typing import Union
 
-from pydantic import BaseModel, IPvAnyAddress, UUID4
+from pydantic import BaseModel, UUID4
 
 
 class BaseWireguardInterfaceSchema(BaseModel):
     name: str
     description: str
-    ip_address: ipaddress.IPv4Interface
+    ip_address: ipaddress.IPv4Network
     listen_port: int
 
     class Config:
@@ -28,18 +27,6 @@ class DetailWireguardInterfaceSchema(BaseWireguardInterfaceSchema):
     on_down: list[str]
 
 
-class ListInterfacePeersSchema(BaseModel):
-    uuid: UUID4
-    description: str
-    dns1: ipaddress.IPv4Address | str
-    dns2: ipaddress.IPv4Address | str
-    name: str
-    state: str
-
-    class Config:
-        orm_mode = True
-
-
 class CreateWireguardInterfaceSchema(BaseWireguardInterfaceSchema):
     on_up: list[str]
     on_down: list[str]
@@ -49,7 +36,19 @@ class CreateWireguardInterfaceSchema(BaseWireguardInterfaceSchema):
 class CreateDefaultValuesResponseSchema(BaseModel):
     name: str
     gateway_interface: str | None
-    ip_address: ipaddress.IPv4Interface
+    ip_address: ipaddress.IPv4Network
     on_up: list[str]
     on_down: list[str]
     port_number: int | None
+
+
+class IptablesRulesSchema(BaseModel):
+    on_up: list[str]
+    on_down: list[str]
+
+
+class FreeIpAddressSchema(BaseModel):
+    ip_address: ipaddress.IPv4Address | None
+
+    class Config:
+        orm_mode = True

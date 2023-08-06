@@ -10,9 +10,12 @@ from starlette.middleware.cors import CORSMiddleware
 from auth.dependencies import get_current_active_user
 from auth.views import auth_router
 from config import settings
+from initial_setup.dependencies import is_configured
+from initial_setup.views import initial_setup_router
 from network.views import network_router
 from user.views import users_router
-from wireguard.views import wireguard_router
+from wireguard.api.v1.views.clients import client_router
+from wireguard.api.v1.views.wireguard import wireguard_router
 
 # from src.core.celery_app import celery_app
 
@@ -68,20 +71,31 @@ app.include_router(
     users_router,
     prefix='/api/v1',
     tags=['users'],
-    dependencies=[Depends(get_current_active_user)],
+    dependencies=[Depends(get_current_active_user), Depends(is_configured)],
 )
 app.include_router(auth_router, prefix='/api', tags=['auth'])
 app.include_router(
     network_router,
     prefix='/api/v1/network',
     tags=['network'],
-    dependencies=[Depends(get_current_active_user)]
+    dependencies=[Depends(get_current_active_user), Depends(is_configured)],
 )
 app.include_router(
     wireguard_router,
     prefix='/api/v1/wireguard',
     tags=['wireguard'],
-    dependencies=[Depends(get_current_active_user)]
+    dependencies=[Depends(get_current_active_user), Depends(is_configured)]
+)
+app.include_router(
+    client_router,
+    prefix='/api/v1/wireguard',
+    tags=['wireguard'],
+    dependencies=[Depends(get_current_active_user), Depends(is_configured)],
+)
+app.include_router(
+    initial_setup_router,
+    prefix='/api/v1',
+    tags=['initial_setup'],
 )
 
 if __name__ == '__main__':

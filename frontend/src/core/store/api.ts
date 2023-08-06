@@ -4,8 +4,6 @@ import { createApi } from '@reduxjs/toolkit/dist/query/react';
 import { apiClient } from '../../utils';
 import { BASE_URL } from '../../config';
 
-// eslint-disable-next-line import/prefer-default-export
-
 type AxiosBaseQueryError = {
   status: number;
   data: any;

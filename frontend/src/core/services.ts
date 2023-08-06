@@ -19,6 +19,12 @@ export const setupResponseInterceptor = (navigate: any) => {
         logout();
         navigate('/login');
       }
+      if (
+        error.response.status === 400 &&
+        error.response.data.detail === 'Initial setup not configured'
+      ) {
+        navigate('/initial-setup');
+      }
       return Promise.reject(error);
     }
   );

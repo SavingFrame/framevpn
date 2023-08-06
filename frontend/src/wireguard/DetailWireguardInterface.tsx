@@ -26,20 +26,18 @@ import Divider from '@mui/material/Divider';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
-import DeleteIcon from '@mui/icons-material/Delete';
 import StopIcon from '@mui/icons-material/Stop';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import ListItemText from '@mui/material/ListItemText';
-import IconButton from '@mui/material/IconButton';
 import { useNavigate } from 'react-router-dom';
 import ResponsiveDrawer from '../dashboard/components/BasePage';
 import {
   useChangeStatusWireguardInterfaceMutation,
   useDeleteWireguardInterfaceMutation,
   useGetDetailWireguardInterfaceQuery,
-  useGetInterfacePeersQuery,
 } from './services';
 import { isAxiosBaseQueryErrorType } from '../core/store/api';
+import DetailPeersInfo from './components/DetailPeersInfo';
 
 // Assuming you have imported the required WireguardInterface data and actions
 
@@ -47,11 +45,6 @@ const WireguardInterfaceDetails = () => {
   const navigate = useNavigate();
   const { uuid } = useParams();
   const { data, error, isLoading } = useGetDetailWireguardInterfaceQuery(uuid!);
-  const {
-    data: peersData,
-    error: peersError,
-    isLoading: peersIsLoading,
-  } = useGetInterfacePeersQuery(uuid!);
   const [useDeleteWireguardInterface] = useDeleteWireguardInterfaceMutation();
   const [
     useChangeStatusWireguardInterface,
@@ -68,14 +61,14 @@ const WireguardInterfaceDetails = () => {
 
   useEffect(() => {
     if (!isLoading && data) {
-      setIsInterfaceUp(data.state === 'up');
+      setIsInterfaceUp(data.state === 'UP');
     }
   }, [isLoading, data]);
-
+  console.log('isInterfaceUp', isInterfaceUp);
   const handleToggleInterface = async () => {
     await useChangeStatusWireguardInterface!({
       uuid: uuid!,
-      toStatus: !isInterfaceUp,
+      toStatus: !isInterfaceUp ? 'up' : 'down',
     });
   };
   useEffect(() => {
@@ -98,8 +91,12 @@ const WireguardInterfaceDetails = () => {
     }
   }, [changeStatusInterfaceError]);
 
-  const handleRestartInterface = () => {
+  const handleRestartInterface = async () => {
     // Implement the logic to restart the interface here
+    await useChangeStatusWireguardInterface!({
+      uuid: uuid!,
+      toStatus: 'restart',
+    });
     setDialogOpen(false); // Close the confirmation dialog
   };
 
@@ -116,18 +113,7 @@ const WireguardInterfaceDetails = () => {
     // Implement the logic to download the configuration here
   };
 
-  // Handler functions for actions on peers
-  // const handleAddPeer = () => {
-  //   console.log('handle add peer');
-  // Implement the logic to add a new peer here
-  // };
-
-  const handleDeletePeer = (peerId: string) => {
-    console.log(peerId);
-    // Implement the logic to delete a peer here
-  };
-
-  if (isLoading || peersIsLoading) {
+  if (isLoading) {
     return (
       <div>
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
@@ -183,7 +169,7 @@ const WireguardInterfaceDetails = () => {
   }
 
   // Show error if there is any error in fetching data
-  if (error || peersError) {
+  if (error) {
     return (
       <div>
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
@@ -308,47 +294,7 @@ const WireguardInterfaceDetails = () => {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} sm={6} md={8}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Interface Peers
-              </Typography>
-              <Divider />
-              <TableContainer component={Paper} sx={{ marginTop: '20px' }}>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Description</TableCell>
-                      <TableCell>DNS</TableCell>
-                      <TableCell>Name</TableCell>
-                      <TableCell>Status</TableCell>
-                      <TableCell>Actions</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {peersData!.map((peer) => (
-                      <TableRow key={peer.uuid}>
-                        <TableCell>{peer.description}</TableCell>
-                        <TableCell>{`${peer.dns1}, ${peer.dns2}`}</TableCell>
-                        <TableCell>{peer.name}</TableCell>
-                        <TableCell>{peer.state}</TableCell>
-                        <TableCell>
-                          <IconButton
-                            onClick={() => handleDeletePeer(peer.uuid)}
-                            size="small"
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </CardContent>
-          </Card>
-        </Grid>
+        <DetailPeersInfo />
       </Grid>
 
       {/* Dialog for Restart Interface confirmation */}

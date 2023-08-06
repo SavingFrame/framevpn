@@ -1,11 +1,11 @@
 import React from 'react';
 import { Box } from '@mui/material';
 import ResponsiveDrawer from '../dashboard/components/BasePage';
-import AddWireguardInterfaceForm from './components/AddWireguardInterfaceForm';
+import AddInterfacePeerForm from './components/AddInterfacePeerForm';
 
 // Your existing code...
 
-export default function AddWireguardInterface() {
+export default function AddInterfacePeer() {
   // ...existing code...
 
   return (
@@ -19,7 +19,7 @@ export default function AddWireguardInterface() {
           // width: { sm: `calc(100% - ${drawerWidth}px)` },
         }}
       >
-        <AddWireguardInterfaceForm />
+        <AddInterfacePeerForm />
       </Box>
     </ResponsiveDrawer>
     // ...existing code...

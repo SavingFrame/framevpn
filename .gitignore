@@ -123,3 +123,5 @@ Temporary Items
 .env
 *.env
 backend/data
+.venv
+*/.venv

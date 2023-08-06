@@ -5,14 +5,14 @@ from pyroute2 import WireGuard, NetlinkError, NDB
 from database import SessionLocal
 from generic.command import WgQuickCommand
 from generic.errors import WireguardError
-from wireguard.models import WireguardInterface
-from wireguard.schemas import CreateWireguardInterfaceSchema
+from wireguard.models import WireguardInterface, WireguardServer
+from wireguard.api.v1.schemas.wireguard import CreateWireguardInterfaceSchema
 from wireguard.utils import generate_wg_private_key, generate_wg_public_key
 
 wg = WireGuard()
 
 
-class WireguardService:
+class WireguardServerService:
 
     @classmethod
     def get_wg_interface_status(cls, iface: str):
@@ -39,7 +39,8 @@ class WireguardService:
         wg_instance = WireguardInterface(
             **data.dict(),
             private_key=private_key_b64,
-            public_key=public_key
+            public_key=public_key,
+            server=db.query(WireguardServer).first(),
         )
         db.add(wg_instance)
         db.commit()
@@ -67,6 +68,14 @@ class WireguardService:
         return True
 
     @classmethod
+    def restart_wg_interface(cls, wg_interface: WireguardInterface):
+        try:
+            cls.down_wg_interface(wg_interface=wg_interface)
+        except WireguardError:
+            pass
+        cls.up_wg_interface(wg_interface=wg_interface)
+
+    @classmethod
     def down_wg_interface(cls, wg_interface: WireguardInterface):
         if cls.is_wg_iface_down(wg_interface.name):
             raise WireguardError(status_code=400, detail='Wireguard interface already down')
@@ -76,6 +85,11 @@ class WireguardService:
         return True
 
     @classmethod
+    def apply(cls, wg_interface: WireguardInterface):
+        cls.generate_wg_config(wg_interface=wg_interface)
+        cls.restart_wg_interface(wg_interface=wg_interface)
+
+    @classmethod
     def generate_wg_config(cls, wg_interface: WireguardInterface):
         wg_config = [
             '[Interface]\n',
@@ -83,8 +97,14 @@ class WireguardService:
             f'Address = {wg_interface.ip_address}\n',
             f'ListenPort = {wg_interface.listen_port}\n',
         ]
-        wg_config.extend([f'PostUp = {command}]\n' for command in wg_interface.on_up])
+        wg_config.extend([f'PostUp = {command}\n' for command in wg_interface.on_up])
         wg_config.extend([f'PostDown = {command}\n' for command in wg_interface.on_down])
+        wg_config.extend(
+            [f'\n[Peer]\n' +
+             f'PublicKey = {peer.public_key}\n' +
+             f'AllowedIPs = {peer.ip_address}\n'
+             for peer in wg_interface.peers]
+        )
         filepath = cls._save_config(wg_config, wg_interface)
         return filepath
 

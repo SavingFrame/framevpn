@@ -14,9 +14,12 @@ sys.path.append(BASE_DIR)
 def import_project_models(base_dir):
     modules = []
     for root, dirs, files in os.walk(base_dir):
+        files = [f for f in files if not f[0] == '.']
+        dirs[:] = [d for d in dirs if not d[0] == '.']
         if 'models.py' in files or 'models' in dirs:
             module_path = os.path.join(root, 'models')
             module_path = module_path.replace(base_dir, '').replace('/', '.')[1:]
+            print(module_path)
             module = importlib.import_module(module_path)
             modules.append(module)
     return modules

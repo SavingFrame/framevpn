@@ -4,11 +4,12 @@ from random import randint
 from coolname import generate_slug
 from faker import Faker
 from faker.providers import internet
-from pyroute2 import IPRoute
+from pyroute2 import IPRoute, IPDB
 
 from config import settings
 from database import SessionLocal
 from wireguard.models import WireguardInterface
+from wireguard.utils import find_first_free_ip
 
 ipr = IPRoute()
 fake = Faker()
@@ -16,6 +17,7 @@ fake.add_provider(internet)
 
 
 class NetworkInterfaceService:
+    NAME_MAX_LENGTH = 15
 
     @staticmethod
     def _interface_state_to_bool(state) -> bool | None:
@@ -46,24 +48,24 @@ class NetworkInterfaceService:
 
     @classmethod
     def generate_name(cls) -> str:
-        name = generate_slug(2)
+        name = generate_slug(2)[:cls.NAME_MAX_LENGTH]
         if cls.is_name_used(name):
             return cls.generate_name()
         return name
 
     @staticmethod
     def _generate_subnet():
-        return ipaddress.IPv4Interface(f'{fake.ipv4_private()}/{randint(8, 30)}')
+        return ipaddress.IPv4Interface(f'{fake.ipv4_private()}/{randint(8, 30)}').network
 
     @classmethod
-    def is_network_used(cls, interface: ipaddress.IPv4Interface):
+    def is_network_used(cls, interface: ipaddress.IPv4Network):
         for iface in cls.get_interfaces():
             if iface.get('ip_address') and interface in ipaddress.IPv4Interface(iface.get('ip_address')).network:
                 return True
         return False
 
     @classmethod
-    def generate_ipv4_subnet(cls) -> ipaddress.IPv4Interface | None:
+    def generate_ipv4_subnet(cls) -> ipaddress.IPv4Network | None:
         ip = cls._generate_subnet()
         tries = 0
         max_tries = 100
@@ -107,3 +109,9 @@ class NetworkInterfaceService:
             f'{settings.IPTABLES_BIN} -t nat -D POSTROUTING -o {gateway_name} -j MASQUERADE',
         ]
         return on_up, on_down
+
+    @classmethod
+    def get_free_ip_address(cls, interface_instance: WireguardInterface) -> ipaddress.IPv4Address | None:
+        subnet = interface_instance.ip_address
+        used_ips = [peer.ip_address for peer in interface_instance.peers]
+        return find_first_free_ip(subnet, used_ips)

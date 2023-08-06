@@ -7,9 +7,10 @@ import Typography from '@mui/material/Typography';
 import { Grid, Skeleton } from '@mui/material';
 import { ArrowDownward, ArrowUpward } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import AddIcon from '@mui/icons-material/Add';
 import { useGetWireguardInterfacesQuery } from '../services';
 
-export default function WireguardNetworkInterfaces() {
+export default function ListInterfaces() {
   const { data, error, isLoading } = useGetWireguardInterfacesQuery();
   const navigate = useNavigate();
   if (isLoading) {
@@ -51,6 +52,19 @@ export default function WireguardNetworkInterfaces() {
     <Grid container spacing={3}>
       <Grid item xs={11}>
         <h2> Interfaces</h2>
+      </Grid>
+
+      <Grid item xs={1} sx={{ display: 'flex', alignItems: 'center' }}>
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<AddIcon />}
+          onClick={() => {
+            navigate('/wireguard/interfaces/add');
+          }}
+        >
+          Create
+        </Button>
       </Grid>
 
       {data.map((networkInterface) => (

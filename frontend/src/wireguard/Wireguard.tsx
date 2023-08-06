@@ -1,11 +1,11 @@
 import React from 'react';
 import ResponsiveDrawer from '../dashboard/components/BasePage';
-import WireguardNetworkInterfaces from './components/Interfaces';
+import ListInterfaces from './components/ListInterfaces';
 
 export default function Wireguard() {
   return (
     <ResponsiveDrawer>
-      <WireguardNetworkInterfaces />
+      <ListInterfaces />
     </ResponsiveDrawer>
   );
 }

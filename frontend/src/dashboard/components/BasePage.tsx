@@ -5,13 +5,12 @@ import CssBaseline from '@mui/material/CssBaseline';
 import Divider from '@mui/material/Divider';
 import Drawer from '@mui/material/Drawer';
 import IconButton from '@mui/material/IconButton';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
+import SensorOccupiedIcon from '@mui/icons-material/SensorOccupied';
 import ListItemText from '@mui/material/ListItemText';
-import MailIcon from '@mui/icons-material/Mail';
 import PeopleIcon from '@mui/icons-material/People';
 import LanIcon from '@mui/icons-material/Lan';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -43,26 +42,18 @@ export default function ResponsiveDrawer({ children }: { children: any }) {
       <Toolbar />
       <Divider />
       <List>
-        {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-          <ListItem key={text} disablePadding>
-            <ListItemButton>
-              <ListItemIcon>
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-              </ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-      <Divider />
-      <List>
-        <ListItem component={NavLink} to="/users" key="users" disablePadding>
-          <ListItemButton selected={location.pathname === '/users'}>
+        <ListItem
+          key="clients"
+          disablePadding
+          component={NavLink}
+          to="/wireguard/clients"
+        >
+          <ListItemButton selected={location.pathname === '/wireguard/clients'}>
             <ListItemIcon>
-              <PeopleIcon />
+              <SensorOccupiedIcon />
             </ListItemIcon>
             <ListItemText
-              primary="Users"
+              primary="Clients"
               classes={{ primary: classes.listItemText }}
             />
           </ListItemButton>
@@ -99,6 +90,20 @@ export default function ResponsiveDrawer({ children }: { children: any }) {
             </ListItemIcon>
             <ListItemText
               primary="Wireguard"
+              classes={{ primary: classes.listItemText }}
+            />
+          </ListItemButton>
+        </ListItem>
+      </List>
+      <Divider />
+      <List>
+        <ListItem component={NavLink} to="/users" key="users" disablePadding>
+          <ListItemButton selected={location.pathname === '/users'}>
+            <ListItemIcon>
+              <PeopleIcon />
+            </ListItemIcon>
+            <ListItemText
+              primary="Users"
               classes={{ primary: classes.listItemText }}
             />
           </ListItemButton>

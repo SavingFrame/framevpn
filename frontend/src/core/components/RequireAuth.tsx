@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { isAuthenticated } from '../auth/services';
+import { isAuthenticated } from '../../auth/services';
 
 function RequireAuth({ children }: { children: any }) {
   if (!isAuthenticated()) {

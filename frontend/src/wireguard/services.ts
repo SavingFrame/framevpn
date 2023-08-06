@@ -50,10 +50,32 @@ export type InterfacePeer = {
   state: string;
 };
 
-export const wireguardApi = api.injectEndpoints({
+export type IpTableRules = {
+  on_up: string[];
+  on_down: string[];
+};
+
+const apiWithTag = api.enhanceEndpoints({
+  addTagTypes: ['Interfaces'],
+});
+
+export const wireguardApi = apiWithTag.injectEndpoints({
   endpoints: (builder) => ({
     getWireguardInterfaces: builder.query<WireguardNetworkInterface[], void>({
       query: () => ({ url: '/api/v1/wireguard/interfaces/', method: 'GET' }),
+      providesTags: (result) =>
+        // is result available?
+        result
+          ? // successful query
+            [
+              ...result.map(
+                ({ uuid }) => ({ type: 'Interfaces', uuid } as const)
+              ),
+              { type: 'Interfaces', id: 'LIST' },
+            ]
+          : // an error occurred, but we still want to refetch this
+            // query when `{ type: 'Posts', id: 'LIST' }` is invalidated
+            [{ type: 'Interfaces', id: 'LIST' }],
     }),
     getDetailWireguardInterface: builder.query<
       DetailWireguardInterface,
@@ -79,6 +101,16 @@ export const wireguardApi = api.injectEndpoints({
         method: 'GET',
       }),
     }),
+    getIpTableRules: builder.query<
+      IpTableRules,
+      { name: string; gatewayInterface: string }
+    >({
+      query: ({ name, gatewayInterface }) => ({
+        url: `/api/v1/wireguard/interfaces/generate_iptable_rules/`,
+        method: 'GET',
+        params: { name, gateway_interface: gatewayInterface },
+      }),
+    }),
     addWireguardInterface: builder.mutation<
       WireguardNetworkInterface,
       CreateWireguardNetworkInterface
@@ -95,17 +127,32 @@ export const wireguardApi = api.injectEndpoints({
         url: `/api/v1/wireguard/interfaces/${uuid}/`,
         method: 'DELETE',
       }),
+      invalidatesTags: (result, error, id) => [{ type: 'Interfaces', id }],
     }),
     changeStatusWireguardInterface: builder.mutation<
       DetailWireguardInterface,
-      { uuid: string; toStatus: boolean }
+      { uuid: string; toStatus: string }
     >({
       query: ({ uuid, toStatus }) => ({
-        url: `/api/v1/wireguard/interfaces/${uuid}/${
-          toStatus === true ? 'up' : 'down'
-        }/`,
+        url: `/api/v1/wireguard/interfaces/${uuid}/${toStatus}/`,
         method: 'POST',
       }),
+      async onQueryStarted({ uuid }, { dispatch, queryFulfilled }) {
+        try {
+          const { data: updatedPost } = await queryFulfilled;
+          dispatch(
+            wireguardApi.util.updateQueryData(
+              'getDetailWireguardInterface',
+              uuid,
+              (draft) => {
+                Object.assign(draft, updatedPost);
+              }
+            )
+          );
+        } catch {
+          /* empty */
+        }
+      },
     }),
   }),
 });
@@ -118,4 +165,5 @@ export const {
   useGetInterfacePeersQuery,
   useDeleteWireguardInterfaceMutation,
   useChangeStatusWireguardInterfaceMutation,
+  useGetIpTableRulesQuery,
 } = wireguardApi;
