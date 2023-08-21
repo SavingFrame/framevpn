@@ -3,6 +3,15 @@ import ipaddress
 from pydantic import BaseModel, UUID4
 
 
+class ServerWireguardInterfaceSchema(BaseModel):
+    uuid: UUID4
+    endpoint: ipaddress.IPv4Address
+    name: str
+
+    class Config:
+        orm_mode = True
+
+
 class BaseWireguardInterfaceSchema(BaseModel):
     name: str
     description: str
@@ -17,6 +26,7 @@ class ListWireguardInterfaceSchema(BaseWireguardInterfaceSchema):
     uuid: UUID4
     state: str
     count_peers: int
+    server: ServerWireguardInterfaceSchema
 
 
 class DetailWireguardInterfaceSchema(BaseWireguardInterfaceSchema):
@@ -25,6 +35,7 @@ class DetailWireguardInterfaceSchema(BaseWireguardInterfaceSchema):
     gateway_interface: str
     on_up: list[str]
     on_down: list[str]
+    server: ServerWireguardInterfaceSchema
 
 
 class CreateWireguardInterfaceSchema(BaseWireguardInterfaceSchema):

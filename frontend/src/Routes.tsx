@@ -1,6 +1,5 @@
 import React, { FC } from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
-
+import { Route, Routes, useNavigate } from 'react-router-dom';
 import Login from './auth/Login';
 import Home from './views/Home';
 import RequireAuth from './core/components/RequireAuth';
@@ -25,7 +24,6 @@ const AppRoutes: FC = () => {
     setIsLoaded(true);
     setupResponseInterceptor(navigate);
   }
-
   return (
     <div>
       <Routes>

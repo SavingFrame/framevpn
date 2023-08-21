@@ -4,14 +4,13 @@ from random import randint
 from coolname import generate_slug
 from faker import Faker
 from faker.providers import internet
-from pyroute2 import IPRoute, IPDB
+from pyroute2 import IPRoute
 
 from config import settings
 from database import SessionLocal
 from wireguard.models import WireguardInterface
 from wireguard.utils import find_first_free_ip
 
-ipr = IPRoute()
 fake = Faker()
 fake.add_provider(internet)
 
@@ -27,23 +26,25 @@ class NetworkInterfaceService:
     @classmethod
     def get_interfaces(cls):
         response = []
-        for interface in ipr.get_links():
-            address_object = ipr.get_addr(index=interface.get('index'))
-            interface_info = {
-                'id': interface.get('index'),
-                'state': cls._interface_state_to_bool(interface.get('state')),
-                'ip_address': address_object[0].get_attr('IFA_ADDRESS') if address_object else None,
-                'name': interface.get_attr('IFLA_IFNAME'),
-                'mac_address': interface.get_attr('IFLA_ADDRESS')
-            }
-            response.append(interface_info)
+        with IPRoute() as ipr:
+            for interface in ipr.get_links():
+                address_object = ipr.get_addr(index=interface.get('index'))
+                interface_info = {
+                    'id': interface.get('index'),
+                    'state': cls._interface_state_to_bool(interface.get('state')),
+                    'ip_address': address_object[0].get_attr('IFA_ADDRESS') if address_object else None,
+                    'name': interface.get_attr('IFLA_IFNAME'),
+                    'mac_address': interface.get_attr('IFLA_ADDRESS')
+                }
+                response.append(interface_info)
         return response
 
     @classmethod
     def is_name_used(cls, name):
-        for iface in ipr.get_links():
-            if iface.get('IFLA_IFNAME') == name:
-                return True
+        with IPRoute() as ipr:
+            for iface in ipr.get_links():
+                if iface.get('IFLA_IFNAME') == name:
+                    return True
         return False
 
     @classmethod
@@ -87,13 +88,16 @@ class NetworkInterfaceService:
 
     @classmethod
     def get_default_gateway(cls) -> tuple[str | None, str | None]:
-        routes = ipr.get_routes(table=254)  # Table 254 is the main table, where default routes are usually stored
-        for route in routes:
-            if route.get_attr('RTA_GATEWAY'):
-                gateway = route.get_attr('RTA_GATEWAY')
-                links = ipr.get_links(route.get_attr('RTA_OIF'))  # Fetch interface info using OIF (output interface)
-                interface_name = links[0].get_attr('IFLA_IFNAME')  # Get the interface name
-                return interface_name, gateway
+        with IPRoute() as ipr:
+            routes = ipr.get_routes(table=254)  # Table 254 is the main table, where default routes are usually stored
+            for route in routes:
+                if route.get_attr('RTA_GATEWAY'):
+                    gateway = route.get_attr('RTA_GATEWAY')
+                    links = ipr.get_links(
+                        route.get_attr('RTA_OIF')
+                        )  # Fetch interface info using OIF (output interface)
+                    interface_name = links[0].get_attr('IFLA_IFNAME')  # Get the interface name
+                    return interface_name, gateway
         return None, None
 
     @classmethod

@@ -1,6 +1,9 @@
-from pyroute2 import IPDB
+from pyroute2 import NDB
 
 
-def get_wg_default_endpoint():
-    with IPDB() as ipdb:
-        return ipdb.interfaces[ipdb.routes['default']['oif']].ipaddr[0]['address']
+def get_wg_default_endpoint() -> str:
+    with NDB() as ndb:
+        try:
+            return ndb.interfaces[ndb.routes['default']['oif']].ipaddr[0]['address']
+        except KeyError:
+            return ''

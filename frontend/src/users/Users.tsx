@@ -9,6 +9,7 @@ import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import ResponsiveDrawer from '../dashboard/components/BasePage';
 import { getUsers, UserListResponse } from './services';
+import useDocumentTitle from '../utils/useDocumentTitle';
 
 interface Column {
   id:
@@ -50,7 +51,7 @@ const columns: readonly Column[] = [
 
 //
 export default function UsersList() {
-  // @ts-ignore
+  useDocumentTitle('Users');
   const [usersList, setUsersList] = React.useState<UserListResponse[]>([]);
   const [usersCount, setUsersCount] = React.useState(0);
 

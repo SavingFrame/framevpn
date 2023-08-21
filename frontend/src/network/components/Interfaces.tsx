@@ -38,7 +38,7 @@ export default function NetworkInterfaces() {
   if (isLoading) {
     // Show Skeleton while loading
     return (
-      <Grid container spacing={3} sx={{ border: 1 }}>
+      <>
         {Array.from(new Array(4)).map((_, index) => (
           // eslint-disable-next-line react/no-array-index-key
           <Grid item xs={3} key={`skeleton-${index}`}>
@@ -55,36 +55,22 @@ export default function NetworkInterfaces() {
             </Card>
           </Grid>
         ))}
-      </Grid>
+      </>
     );
   }
 
   if (!data || data.length === 0 || error) {
     // Show message when there is no data
     return (
-      <Grid container spacing={3} sx={{ border: 1 }}>
-        <Grid item xs={11}>
-          <h2> Interfaces</h2>
-        </Grid>
-        <Grid xs={1}>
-          <Button variant="contained">Test button</Button>
-        </Grid>
-        <Grid item xs={12}>
-          <Typography variant="body2">No data available.</Typography>
-        </Grid>
+      <Grid item xs={12}>
+        <Typography variant="body2">No data available.</Typography>
       </Grid>
     );
   }
 
   // Render the data when not loading and data is available
   return (
-    <Grid container spacing={3} sx={{ border: 1 }}>
-      <Grid item xs={11}>
-        <h2> Interfaces</h2>
-      </Grid>
-      <Grid xs={1}>
-        <Button variant="contained">Test button</Button>
-      </Grid>
+    <>
       {data.map((networkInterface) => (
         <Grid item xs={3} key={networkInterface.id}>
           <Card sx={{ minWidth: 230 }}>
@@ -105,6 +91,6 @@ export default function NetworkInterfaces() {
           </Card>
         </Grid>
       ))}
-    </Grid>
+    </>
   );
 }

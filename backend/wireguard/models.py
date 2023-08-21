@@ -1,10 +1,13 @@
-from datetime import timedelta
+from datetime import timedelta, datetime
 from typing import List
+
+from uuid import UUID
 
 import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import INET, ARRAY
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship, object_session
+from ipaddress import IPv4Network, IPv4Address
 
 from config import settings
 from database import Base
@@ -24,7 +27,13 @@ class WireguardInterfacePeer(Base):
 
     @hybrid_property
     def last_online(self):
-        return timedelta(minutes=1)  # TODO
+        from wireguard.services.client import WireguardClientService
+        peer_information = WireguardClientService.peer_information(self)
+        return datetime.fromtimestamp(peer_information.last_handshake)
+
+    @hybrid_property
+    def uuid_pk(self):
+        return f'{self.interface_id}-{self.client_id}'
 
 
 class WireguardServer(Base):
@@ -41,16 +50,16 @@ class WireguardServer(Base):
 class WireguardInterface(Base):
     __tablename__ = 'wireguard_interface'
 
-    uuid = sa.Column(sa.UUID, primary_key=True, index=True, server_default=sa.text("gen_random_uuid()"))
-    gateway_interface = sa.Column(sa.String, default='eth0')
-    description = sa.Column(sa.String, default='')
-    ip_address = sa.Column(IPNetwork)
-    listen_port = sa.Column(sa.Integer)
-    name = sa.Column(sa.String(125), unique=True)
-    on_up = sa.Column(ARRAY(sa.String), default=list)
-    on_down = sa.Column(ARRAY(sa.String), default=list)
-    private_key = sa.Column(sa.String)
-    public_key = sa.Column(sa.String)
+    uuid: Mapped[UUID] = mapped_column(sa.UUID, primary_key=True, index=True, server_default=sa.text("gen_random_uuid()"))
+    gateway_interface: Mapped[str] = mapped_column(sa.String, default='eth0')
+    description: Mapped[str] = mapped_column(sa.String, default='')
+    ip_address: Mapped[IPv4Network] = mapped_column(IPNetwork)
+    listen_port: Mapped[int] = mapped_column(sa.Integer)
+    name: Mapped[str] = mapped_column(sa.String(125), unique=True)
+    on_up: Mapped[list[str]] = mapped_column(ARRAY(sa.String), default=list)
+    on_down: Mapped[list[str]] = mapped_column(ARRAY(sa.String), default=list)
+    private_key: Mapped[str] = mapped_column(sa.String)
+    public_key: Mapped[str] = mapped_column(sa.String)
     server_id: Mapped[str] = mapped_column(sa.ForeignKey('wireguard_server.uuid'), nullable=False)
     server: Mapped["WireguardServer"] = relationship(back_populates='interfaces')
     peers: Mapped[List["WireguardInterfacePeer"]] = relationship(
@@ -79,11 +88,11 @@ class WireguardInterface(Base):
 class WireguardClient(Base):
     __tablename__ = 'wireguard_client'
 
-    uuid = sa.Column(sa.UUID, primary_key=True, index=True, server_default=sa.text("gen_random_uuid()"))
-    name = sa.Column(sa.String)
-    description = sa.Column(sa.String)
-    dns1 = sa.Column(IPAddress, default='8.8.8.8')
-    dns2 = sa.Column(IPAddress, default='8.8.4.4')
+    uuid: Mapped[UUID] = mapped_column(sa.UUID, primary_key=True, index=True, server_default=sa.text("gen_random_uuid()"))
+    name: Mapped[str] = mapped_column(sa.String)
+    description: Mapped[str] = mapped_column(sa.String)
+    dns1: Mapped[IPv4Address] = mapped_column(IPAddress, default='8.8.8.8')
+    dns2: Mapped[IPv4Address] = mapped_column(IPAddress, default='8.8.4.4')
     peers: Mapped[List[WireguardInterfacePeer]] = relationship(back_populates='client')
     interfaces: Mapped[List[WireguardInterface]] = relationship(
         back_populates='clients',

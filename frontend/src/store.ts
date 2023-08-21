@@ -1,10 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
 import { api } from './core/store/api';
+import routeTitleReducer from './dashboard/pageTitleSlice';
 
 export const store = configureStore({
   reducer: {
     [api.reducerPath]: api.reducer,
+    routeTitle: routeTitleReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(api.middleware),

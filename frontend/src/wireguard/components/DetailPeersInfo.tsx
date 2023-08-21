@@ -1,5 +1,7 @@
 import React from 'react';
 import {
+  Box,
+  Button,
   Grid,
   Paper,
   Skeleton,
@@ -10,8 +12,6 @@ import {
   TableHead,
   TableRow,
   Typography,
-  Button,
-  Box,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { useParams } from 'react-router';
@@ -22,6 +22,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import IconButton from '@mui/material/IconButton';
 import { useNavigate } from 'react-router-dom';
 import { useGetInterfacePeersQuery } from '../services';
+import RelativeDateFromNow from '../../network/components/RelativeDateFromNow';
 
 // Assuming you have imported the required WireguardInterface data and actions
 
@@ -139,23 +140,27 @@ const DetailPeersInfo = () => {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Description</TableCell>
-                  <TableCell>DNS</TableCell>
                   <TableCell>Name</TableCell>
+                  <TableCell>IP Address</TableCell>
                   <TableCell>Status</TableCell>
+                  <TableCell>DNS</TableCell>
                   <TableCell>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {peersData!.map((peer) => (
-                  <TableRow key={peer.uuid}>
-                    <TableCell>{peer.description}</TableCell>
-                    <TableCell>{`${peer.dns1}, ${peer.dns2}`}</TableCell>
-                    <TableCell>{peer.name}</TableCell>
-                    <TableCell>{peer.state}</TableCell>
+                  <TableRow key={peer.uuid_pk}>
+                    <TableCell>{peer.client.name}</TableCell>
+                    <TableCell>{peer.ip_address}</TableCell>
+                    <TableCell>
+                      <RelativeDateFromNow
+                        lastOnline={new Date(`${peer.last_online}Z`)}
+                      />
+                    </TableCell>
+                    <TableCell>{`${peer.client.dns1}, ${peer.client.dns2}`}</TableCell>
                     <TableCell>
                       <IconButton
-                        onClick={() => handleDeletePeer(peer.uuid)}
+                        onClick={() => handleDeletePeer(peer.uuid_pk)}
                         size="small"
                       >
                         <DeleteIcon />

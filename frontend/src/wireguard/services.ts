@@ -1,5 +1,11 @@
 import { api } from '../core/store/api';
 
+type WireguardServer = {
+  uuid: string;
+  name: string;
+  endpoint: string;
+};
+
 export type WireguardNetworkInterface = {
   uuid: string;
   state: string;
@@ -8,6 +14,7 @@ export type WireguardNetworkInterface = {
   name: string;
   listen_port: number;
   count_peers: number;
+  server: WireguardServer;
 };
 
 export type CreateWireguardNetworkInterface = {
@@ -39,15 +46,23 @@ export type DetailWireguardInterface = {
   description: string;
   ip_address: string;
   listen_port: number;
+  server: WireguardServer;
 };
 
-export type InterfacePeer = {
+export type InterfacePeerClient = {
   uuid: string;
   description: string;
   dns1: string;
   dns2: string;
   name: string;
-  state: string;
+};
+
+export type InterfacePeer = {
+  uuid_pk: string;
+  name: string;
+  last_online: Date;
+  ip_address: string;
+  client: InterfacePeerClient;
 };
 
 export type IpTableRules = {

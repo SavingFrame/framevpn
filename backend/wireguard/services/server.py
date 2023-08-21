@@ -1,15 +1,13 @@
 import os
 
-from pyroute2 import WireGuard, NetlinkError, NDB
+from pyroute2 import WireGuard, NetlinkError
 
 from database import SessionLocal
 from generic.command import WgQuickCommand
 from generic.errors import WireguardError
-from wireguard.models import WireguardInterface, WireguardServer
 from wireguard.api.v1.schemas.wireguard import CreateWireguardInterfaceSchema
+from wireguard.models import WireguardInterface, WireguardServer
 from wireguard.utils import generate_wg_private_key, generate_wg_public_key
-
-wg = WireGuard()
 
 
 class WireguardServerService:
@@ -17,7 +15,8 @@ class WireguardServerService:
     @classmethod
     def get_wg_interface_status(cls, iface: str):
         try:
-            wg.info(iface)
+            with WireGuard() as wg:
+                wg.info(iface)
             return 'UP'
         except NetlinkError as err:
             if err.code == 19:

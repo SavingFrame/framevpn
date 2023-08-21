@@ -38,6 +38,7 @@ import {
   WireguardNetworkInterface,
 } from '../../wireguard/services';
 import DeleteConfirmationDialog from './DeleteConfirmationDialog';
+import RelativeDateFromNow from '../../network/components/RelativeDateFromNow';
 
 const ListInterfacesInClient = () => {
   const { uuid } = useParams();
@@ -180,7 +181,11 @@ const ListInterfacesInClient = () => {
               <TableRow key={peer.client_id + peer.interface.uuid}>
                 <TableCell>{peer.interface.name}</TableCell>
                 <TableCell>{peer.interface.ip_address}</TableCell>
-                <TableCell>{peer.last_online}</TableCell>
+                <TableCell>
+                  <RelativeDateFromNow
+                    lastOnline={new Date(`${peer.last_online}Z`)}
+                  />
+                </TableCell>
                 <TableCell>{peer.ip_address}</TableCell>
                 <TableCell>
                   <IconButton

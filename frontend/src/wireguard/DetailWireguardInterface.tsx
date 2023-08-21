@@ -38,10 +38,12 @@ import {
 } from './services';
 import { isAxiosBaseQueryErrorType } from '../core/store/api';
 import DetailPeersInfo from './components/DetailPeersInfo';
+import useDocumentTitle from '../utils/useDocumentTitle';
 
 // Assuming you have imported the required WireguardInterface data and actions
 
 const WireguardInterfaceDetails = () => {
+  useDocumentTitle('Wireguard Interface Details');
   const navigate = useNavigate();
   const { uuid } = useParams();
   const { data, error, isLoading } = useGetDetailWireguardInterfaceQuery(uuid!);

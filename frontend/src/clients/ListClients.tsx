@@ -4,8 +4,10 @@ import AddIcon from '@mui/icons-material/Add';
 import { useNavigate } from 'react-router-dom';
 import ResponsiveDrawer from '../dashboard/components/BasePage';
 import ListClientsTable from './components/ListClientsTable';
+import useDocumentTitle from '../utils/useDocumentTitle';
 
 const ListClients = () => {
+  useDocumentTitle('Clients');
   const navigate = useNavigate();
   return (
     <ResponsiveDrawer>

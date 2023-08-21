@@ -2,11 +2,12 @@ import React from 'react';
 import { Box } from '@mui/material';
 import ResponsiveDrawer from '../dashboard/components/BasePage';
 import AddWireguardInterfaceForm from './components/AddWireguardInterfaceForm';
+import useDocumentTitle from '../utils/useDocumentTitle';
 
 // Your existing code...
 
 export default function AddWireguardInterface() {
-  // ...existing code...
+  useDocumentTitle('Add Wireguard Interface');
 
   return (
     // ...existing code...

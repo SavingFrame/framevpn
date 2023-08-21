@@ -3,8 +3,10 @@ import React from 'react';
 import ResponsiveDrawer from '../dashboard/components/BasePage';
 import DetailClientInfo from './components/DetailClientInfo';
 import ListInterfacesInClient from './components/ListInterfacesInClient';
+import useDocumentTitle from '../utils/useDocumentTitle';
 
 const DetailClient = () => {
+  useDocumentTitle('Client Details');
   return (
     <ResponsiveDrawer>
       <Grid container spacing={2}>

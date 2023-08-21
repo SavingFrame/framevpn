@@ -1,18 +1,27 @@
 import ipaddress
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 from pydantic import BaseModel, UUID4
 
 from wireguard.models import WireguardInterface
 
 
-class ListInterfacePeersSchema(BaseModel):
+class ListInterfacePeerClientSchema(BaseModel):
     uuid: UUID4
-    description: str
+    name: str
     dns1: ipaddress.IPv4Address | str
     dns2: ipaddress.IPv4Address | str
-    name: str
-    state: str
+    description: str
+
+    class Config:
+        orm_mode = True
+
+
+class ListInterfacePeersSchema(BaseModel):
+    uuid_pk: str
+    last_online: datetime | None
+    ip_address: ipaddress.IPv4Address
+    client: ListInterfacePeerClientSchema
 
     class Config:
         orm_mode = True
@@ -67,7 +76,7 @@ class ListClientPeerInterfaceSchema(BaseModel):
 class ListClientPeerSchema(BaseModel):
     client_id: UUID4
     interface: ListClientPeerInterfaceSchema
-    last_online: timedelta
+    last_online: datetime
     ip_address: ipaddress.IPv4Address | str | None
 
     class Config:

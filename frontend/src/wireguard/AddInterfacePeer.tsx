@@ -2,10 +2,12 @@ import React from 'react';
 import { Box } from '@mui/material';
 import ResponsiveDrawer from '../dashboard/components/BasePage';
 import AddInterfacePeerForm from './components/AddInterfacePeerForm';
+import useDocumentTitle from '../utils/useDocumentTitle';
 
 // Your existing code...
 
 export default function AddInterfacePeer() {
+  useDocumentTitle('Add Interface Peer');
   // ...existing code...
 
   return (

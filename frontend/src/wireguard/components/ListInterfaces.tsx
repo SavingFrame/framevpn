@@ -7,7 +7,6 @@ import Typography from '@mui/material/Typography';
 import { Grid, Skeleton } from '@mui/material';
 import { ArrowDownward, ArrowUpward } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import AddIcon from '@mui/icons-material/Add';
 import { useGetWireguardInterfacesQuery } from '../services';
 
 export default function ListInterfaces() {
@@ -15,7 +14,7 @@ export default function ListInterfaces() {
   const navigate = useNavigate();
   if (isLoading) {
     return (
-      <Grid container spacing={3}>
+      <>
         {Array.from(new Array(4)).map((_, index) => (
           // eslint-disable-next-line react/no-array-index-key
           <Grid item xs={3} key={index}>
@@ -34,43 +33,35 @@ export default function ListInterfaces() {
             </Card>
           </Grid>
         ))}
-      </Grid>
+      </>
     );
   }
 
   // If data is undefined or empty, show fallback message or component
   if (!data || data.length === 0 || error) {
     return (
-      <Typography variant="body2" align="center">
-        No data available.
-      </Typography>
+      <Grid item xs={12}>
+        <Typography variant="body2" align="center">
+          No data available.
+        </Typography>
+      </Grid>
     );
   }
 
   // If data is available, render the mapped data
   return (
-    <Grid container spacing={3}>
-      <Grid item xs={11}>
-        <h2> Interfaces</h2>
-      </Grid>
-
-      <Grid item xs={1} sx={{ display: 'flex', alignItems: 'center' }}>
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<AddIcon />}
-          onClick={() => {
-            navigate('/wireguard/interfaces/add');
-          }}
-        >
-          Create
-        </Button>
-      </Grid>
-
+    <>
       {data.map((networkInterface) => (
         <Grid item xs={3} key={networkInterface.uuid}>
           <Card sx={{ minWidth: 230 }}>
             <CardContent>
+              <Typography
+                sx={{ fontSize: 14 }}
+                color="text.secondary"
+                gutterBottom
+              >
+                {networkInterface.server.name}
+              </Typography>
               <Typography variant="h5" component="div">
                 {networkInterface.name}
               </Typography>
@@ -115,6 +106,6 @@ export default function ListInterfaces() {
           </Card>
         </Grid>
       ))}
-    </Grid>
+    </>
   );
 }

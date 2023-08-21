@@ -21,6 +21,7 @@ class ConfigSchema(CaseInsensitiveModel):
     wg_endpoint: str
     is_configured: bool = True
     server_name: str
+    external_server: str | None = None
 
     class Config:
         orm_mode = True

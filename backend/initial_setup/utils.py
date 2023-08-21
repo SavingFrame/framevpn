@@ -1,7 +1,8 @@
 from config import settings
 
 
-def save_settings_to_env(kv: dict):
+def save_settings_to_env(settings_dict: dict):
     with open(settings.BASE_DIR.joinpath('.env'), 'a') as f:
-        for k, v in kv.items():
-            f.write(f'\n{k.upper()}={v}\n')
+        f.write('\n')
+        for k, v in settings_dict.items():
+            f.write(f'{k.upper()}={v}\n')

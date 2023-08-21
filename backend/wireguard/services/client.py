@@ -1,4 +1,5 @@
 from fastapi import HTTPException
+from wireguard_tools.wireguard_config import WireguardPeer
 
 from config import settings
 from database import SessionLocal
@@ -7,6 +8,7 @@ from wireguard.api.v1.schemas.clients import CreateClientPeerSchema, CreateClien
 from wireguard.models import WireguardClient, WireguardInterfacePeer, WireguardInterface
 from wireguard.services.server import WireguardServerService
 from wireguard.utils import generate_wg_private_key, generate_wg_public_key
+from wireguard_tools import WireguardDevice, WireguardKey
 
 
 class WireguardClientService:
@@ -98,3 +100,11 @@ class WireguardClientService:
         db.delete(client)
         db.commit()
         return
+
+    @classmethod
+    def peer_information(cls, peer: WireguardInterfacePeer) -> WireguardPeer | None:
+        key = WireguardKey(peer.public_key)
+        try:
+            return WireguardDevice.get(peer.interface.name).get_config().peers.get(key)
+        except RuntimeError:
+            return None

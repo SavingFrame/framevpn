@@ -19,6 +19,8 @@ import Typography from '@mui/material/Typography';
 import { makeStyles } from 'tss-react/mui';
 import { NavLink, useLocation } from 'react-router-dom';
 import DnsIcon from '@mui/icons-material/Dns';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store';
 
 const useStyles = makeStyles()((theme) => ({
   listItemText: {
@@ -30,6 +32,7 @@ export default function ResponsiveDrawer({ children }: { children: any }) {
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [drawerWidth] = React.useState(240);
   const location = useLocation();
+  const currentRouteTitle = useSelector((state: RootState) => state.routeTitle);
 
   const { classes } = useStyles();
 
@@ -60,24 +63,6 @@ export default function ResponsiveDrawer({ children }: { children: any }) {
         </ListItem>
         <ListItem
           component={NavLink}
-          to="/network/interfaces"
-          key="network"
-          disablePadding
-        >
-          <ListItemButton
-            selected={location.pathname === '/network/interfaces'}
-          >
-            <ListItemIcon>
-              <LanIcon />
-            </ListItemIcon>
-            <ListItemText
-              primary="Network"
-              classes={{ primary: classes.listItemText }}
-            />
-          </ListItemButton>
-        </ListItem>
-        <ListItem
-          component={NavLink}
           to="/wireguard/interfaces"
           key="wireguardInterfaces"
           disablePadding
@@ -90,6 +75,24 @@ export default function ResponsiveDrawer({ children }: { children: any }) {
             </ListItemIcon>
             <ListItemText
               primary="Wireguard"
+              classes={{ primary: classes.listItemText }}
+            />
+          </ListItemButton>
+        </ListItem>
+        <ListItem
+          component={NavLink}
+          to="/network/interfaces"
+          key="network"
+          disablePadding
+        >
+          <ListItemButton
+            selected={location.pathname === '/network/interfaces'}
+          >
+            <ListItemIcon>
+              <LanIcon />
+            </ListItemIcon>
+            <ListItemText
+              primary="Network"
               classes={{ primary: classes.listItemText }}
             />
           </ListItemButton>
@@ -133,7 +136,7 @@ export default function ResponsiveDrawer({ children }: { children: any }) {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div">
-            Responsive drawer
+            {currentRouteTitle.value}
           </Typography>
         </Toolbar>
       </AppBar>
